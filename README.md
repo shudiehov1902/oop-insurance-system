@@ -1,56 +1,48 @@
 # OOP Insurance System
 
-Semestrálny projekt z predmetu B-OOP (FEI STU, 2025) — jednoduchý model poisťovacieho
-systému pre malé poisťovne, implementovaný v Jave podľa zadania `OOP_semestralne_zadanie.pdf`.
+Implementation of a simplified insurance system, based on the official B-OOP 2025 semester assignment from FEI STU. The system models insurance contracts, payments, vehicles, persons, and claims according to a detailed UML diagram and strict behavioral rules.
 
-## Popis
+## Demo Run
 
-Systém modeluje poisťovňu (`InsuranceCompany`), ktorá uzatvára a spravuje tri typy
-poistných zmlúv:
+The project has no graphical or web interface by design (it's a pure domain-model/OOP exercise, validated primarily through unit tests). Below is a console demo (`Demo.java`) exercising the core flow end to end: company setup, a natural person with a validated Slovak birth number, a vehicle, business-rule validation, contract creation, and claim processing through to a total-loss scenario.
 
-- **SingleVehicleContract** — povinné zmluvné poistenie (PZP) pre jedno vozidlo
-- **MasterVehicleContract** — rámcová (súborová) PZP zmluva pre flotilu vozidiel,
-  zložená z jednotlivých `SingleVehicleContract`
-- **TravelContract** — cestovné poistenie skupiny osôb
+![Demo run](screenshots/insurance_demo_run.png)
 
-Poistenými objektmi môžu byť osoby (`Person`, fyzické aj právnické) alebo vozidlá
-(`Vehicle`). Platby na zmluvách spravuje `PaymentHandler`, ktorý vykonáva úhrady
-a ukladá ich históriu (`PaymentInstance`). Poisťovňa priebežne aktualizuje nedoplatky
-zmlúv a spracúva poistné udalosti (výplatu poistného plnenia).
+## What the demo shows
 
-## Štruktúra balíčkov
+- **Validation rules are enforced, not just modeled** — attempting to insure a vehicle with a premium below the required 2% minimum is correctly rejected with a clear exception message.
+- **Slovak birth number validation** — `Person` validates the national ID format including the checksum digit, and infers legal form (natural vs. legal person) automatically.
+- **Contract lifecycle** — a claim below the total-loss threshold (70% of vehicle value) pays out but keeps the contract active; a claim above that threshold deactivates it.
+- **Composition over duplication** — `MasterVehicleContract` and `SingleVehicleContract` share behavior through `AbstractContract` rather than duplicating logic.
+
+## Project Structure
 
 ```
 src/main/java/
-├── company/    InsuranceCompany
-├── contracts/  AbstractContract, AbstractVehicleContract, SingleVehicleContract,
-│               MasterVehicleContract, TravelContract, InvalidContractException
-├── objects/    Person, Vehicle, LegalForm
-└── payment/    ContractPaymentData, PaymentHandler, PaymentInstance,
-                PremiumPaymentFrequency
+  company/InsuranceCompany.java       Core orchestration: issuing contracts, charging premiums, processing claims
+  contracts/                          AbstractContract and its subtypes (Single/Master Vehicle, Travel)
+  objects/                            Person, Vehicle, LegalForm
+  payment/                            Payment handling, payment frequency, contract payment data
+src/test/java/
+  RequiredTests.java, AiBasedTests.java   JUnit 5 test suites
+Demo.java                             Standalone console demo (no external dependencies)
 ```
 
-## Build a testy
+## Running the demo locally
 
-Projekt používa Maven (Java 23, JUnit 5).
+The main source has no external dependencies, so it compiles with plain `javac`:
+
+```bash
+mkdir -p out
+javac -d out -encoding UTF-8 $(find src/main/java -name "*.java")
+javac -d out -encoding UTF-8 -cp out Demo.java
+java -cp out Demo
+```
+
+## Running the test suite
+
+The test suite uses JUnit 5 via Maven:
 
 ```bash
 mvn test
 ```
-
-Testy sa nachádzajú v `src/test/java` (`RequiredTests.java` — zadané testy,
-`AiBasedTests.java` — doplnkové testy).
-
-## Opravené chyby
-
-- **Surefire nespúšťal žiadne testy** — `pom.xml` obmedzoval testy na vzor
-  `**/*Test.java`, ktorému nevyhovuje ani `RequiredTests.java`, ani
-  `AiBasedTests.java` (obe končia na `Tests.java`). Testy sa teda nikdy
-  nespúšťali. Obmedzenie bolo odstránené, takže Surefire teraz používa
-  štandardné (širšie) vzory a všetky testy sa spustia.
-- **`Person.contracts` obsahovala aj zmluvy, kde je osoba len oprávnenou osobou
-  (beneficiary)** — podľa zadania má táto množina obsahovať iba zmluvy, na
-  ktorých je osoba uvedená ako `policyHolder`. V `InsuranceCompany.insureVehicle`
-  a `InsuranceCompany.createMasterVehicleContract` sa navyše volalo aj
-  `beneficiary.addContract(contract)`, čo bolo v rozpore so zadaním; tieto
-  volania boli odstránené.
