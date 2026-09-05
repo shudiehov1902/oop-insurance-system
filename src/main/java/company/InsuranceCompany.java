@@ -79,9 +79,6 @@ public class InsuranceCompany
 
         contracts.add(contract);
         policyHolder.addContract(contract);
-        if (beneficiary != null) {
-            beneficiary.addContract(contract);
-        }
 
         return contract;
 
@@ -145,9 +142,6 @@ public class InsuranceCompany
         MasterVehicleContract contract = new MasterVehicleContract(contractNumber, this, beneficiary, policyHolder);
         contracts.add(contract);
         policyHolder.addContract(contract);
-        if (beneficiary != null) {
-            beneficiary.addContract(contract);
-        }
         return contract;
 
     }
