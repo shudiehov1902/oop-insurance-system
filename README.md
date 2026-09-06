@@ -42,7 +42,3 @@ java -cp out Demo
 ## Running the test suite
 
 The test suite uses JUnit 5 via Maven:
-
-```bash
-mvn test
-```
