@@ -15,6 +15,12 @@ The project has no graphical or web interface by design (it's a pure domain-mode
 - **Contract lifecycle** — a claim below the total-loss threshold (70% of vehicle value) pays out but keeps the contract active; a claim above that threshold deactivates it.
 - **Composition over duplication** — `MasterVehicleContract` and `SingleVehicleContract` share behavior through `AbstractContract` rather than duplicating logic.
 
+## UML Diagram
+
+The implementation follows the class diagram specified in the assignment (attributes, method signatures, visibility, and relationships between classes):
+
+![UML class diagram](screenshots/uml-diagram.png)
+
 ## Project Structure
 
 ```
